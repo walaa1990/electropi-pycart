@@ -9,6 +9,9 @@ from pycaret.classification import *
 from pycaret.regression import *
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import LabelEncoder
+from pycaret.regression import RegressionExperiment
+from pycaret.classification import ClassificationExperiment
+
 
 with st.sidebar:
     st.header("The steps to get the algorithms prediction accuracy")
@@ -71,22 +74,24 @@ def remove_feature():
         st.write(data.sample())
         
 def compare_create_model():
-    
-    setup(data = data, target = target, session_id = 123)
-
-    best = compare_models()
-    
+    if(option == 'Regression'):
+        s = RegressionExperiment()
+    if(option == "Classification"):
+        s = ClassificationExperiment()
+    s.setup(data, target = target, session_id = 123)
+    best = s.compare_models()
     st.text(best)
-    # knn = create_model('knn')
-    # sometimes plot not available I used help(plot_model) 
-    # plot_model(knn, plot = 'confusion_matrix', display_format='streamlit')
-    
     st.header("best Algorithm")
     st.write(best)
+    st.write(s.evaluate_model(best))
     st.header(" 30 row of Preduction ")
-    predictions = predict_model(best, data=data)
+    predictions = s.predict_model(best, data=data, raw_score=True)
     st.write(predictions.head(30))
     
+option = st.selectbox(
+        " What would you like to use?",
+        ("Regression", "Classification"),
+        ) 
 upload_dataset()
 if (data.shape!=(0, 0)):
     remove_feature()
